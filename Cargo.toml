@@ -1,0 +1,10 @@
+[package]
+name = "joevm-rust-env"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.86"
+
+alloy = { version = "0.2.0", features = ["full"] }
+revm = { version = "12.1.0", features = ["optional_balance_check"] }
