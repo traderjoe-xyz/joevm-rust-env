@@ -1,12 +1,14 @@
 use revm::{
     db::{CacheDB, EmptyDB},
-    primitives::{Address, Bytes, ExecutionResult, ResultAndState, TransactTo},
+    primitives::{address, Address, Bytes, ExecutionResult, ResultAndState, TransactTo},
     DatabaseCommit, Evm,
 };
 
 use modules::tokens::TokenModule;
 
 pub mod modules;
+
+pub const DEFAULT_ADDRESS: Address = address!("0000000000000000000000000000000000000000");
 
 pub struct JoeUniverse {
     pub db: CacheDB<EmptyDB>,
@@ -52,33 +54,5 @@ impl JoeUniverse {
         }
 
         result
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    use modules::tokens::TokenCreator;
-    use revm::primitives::address;
-
-    const ALICE: Address = address!("0000000000000000000000000000000000000001");
-
-    #[test]
-    fn playground_test() {
-        let mut joe_universe = JoeUniverse::new();
-
-        joe_universe.create_token("JoeToken", 18).unwrap();
-
-        println!(
-            "Token: {:?}",
-            joe_universe.token_module.tokens.get("JoeToken")
-        );
-
-        joe_universe.mint("JoeToken", ALICE, 2134).unwrap();
-
-        let balance = joe_universe.balance_of("JoeToken", ALICE).unwrap();
-
-        println!("Balance: {:?}", balance);
     }
 }
