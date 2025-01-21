@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-anyhow = "1.0.86"
+anyhow = "1.0.95"
 
-alloy = { version = "0.2.0", features = ["full"] }
-revm = { version = "12.1.0", features = ["optional_balance_check"] }
+alloy = { version = "0.9.2", features = ["sol-types", "dyn-abi", "json"] }
+revm = { version = "19.3.0", features = ["optional_balance_check"] }
