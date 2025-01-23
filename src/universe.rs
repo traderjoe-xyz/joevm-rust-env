@@ -20,20 +20,20 @@ const DEFAULT_BASE_TOKEN: &str = "Default Base Token";
 
 // JoeUniverse is a wrapper around the EvmEngine that provides a simplified API for interacting with the engine modules.
 pub struct JoeUniverse {
-    joe_universe: EvmEngine,
+    engine: EvmEngine,
 }
 
 impl JoeUniverse {
     pub fn new() -> Self {
-        let mut joe_universe = EvmEngine::new();
+        let mut engine = EvmEngine::new();
 
-        joe_universe
+        engine
             .deploy_token_mill(TM_DEFAULT_PROTOCOL_FEE_SHARE, TM_DEFAULT_REFERRAL_FEE_SHARE)
             .unwrap();
-        joe_universe.create_token(DEFAULT_QUOTE_TOKEN, 9).unwrap();
-        joe_universe.add_quote_token(DEFAULT_QUOTE_TOKEN).unwrap();
+        engine.create_token(DEFAULT_QUOTE_TOKEN, 9).unwrap();
+        engine.add_quote_token(DEFAULT_QUOTE_TOKEN).unwrap();
 
-        Self { joe_universe }
+        Self { engine }
     }
 
     pub fn create_market(
@@ -44,7 +44,7 @@ impl JoeUniverse {
     ) {
         let curve = price_curve.to_evm();
 
-        self.joe_universe
+        self.engine
             .create_token_and_market(
                 DEFAULT_BASE_TOKEN,
                 base_token_decimals,
@@ -65,7 +65,7 @@ impl JoeUniverse {
         amount: u64,
     ) -> (u64, u64) {
         let market = *self
-            .joe_universe
+            .engine
             .token_mill_module
             .get_market(DEFAULT_BASE_TOKEN)
             .unwrap();
@@ -80,7 +80,7 @@ impl JoeUniverse {
         let amount_in = match swap_amount_type {
             SwapAmountType::ExactInput => amount as u128,
             SwapAmountType::ExactOutput => self
-                .joe_universe
+                .engine
                 .get_amount_in(DEFAULT_BASE_TOKEN, delta_amount, base_to_quote)
                 .unwrap(),
         };
@@ -91,23 +91,17 @@ impl JoeUniverse {
             (DEFAULT_QUOTE_TOKEN, DEFAULT_BASE_TOKEN)
         };
 
-        let balance_before = self
-            .joe_universe
-            .balance_of(token_out, DEFAULT_ADDRESS)
-            .unwrap();
+        let balance_before = self.engine.balance_of(token_out, DEFAULT_ADDRESS).unwrap();
 
-        self.joe_universe
+        self.engine
             .transfer(token_in, DEFAULT_ADDRESS, market, amount_in)
             .unwrap();
 
-        self.joe_universe
+        self.engine
             .swap(DEFAULT_BASE_TOKEN, delta_amount, base_to_quote)
             .unwrap();
 
-        let balance_after = self
-            .joe_universe
-            .balance_of(token_out, DEFAULT_ADDRESS)
-            .unwrap();
+        let balance_after = self.engine.balance_of(token_out, DEFAULT_ADDRESS).unwrap();
 
         let amount_out = balance_after - balance_before;
 
@@ -118,18 +112,15 @@ impl JoeUniverse {
     }
 
     pub fn claim_fees(&mut self) -> (u64, u64, u64) {
-        let creator_fee = self
-            .joe_universe
-            .claim_creator_fees(DEFAULT_BASE_TOKEN)
-            .unwrap();
+        let creator_fee = self.engine.claim_creator_fees(DEFAULT_BASE_TOKEN).unwrap();
 
         let referral_fee = self
-            .joe_universe
+            .engine
             .claim_referral_fees(DEFAULT_QUOTE_TOKEN)
             .unwrap();
 
         let protocol_fee = self
-            .joe_universe
+            .engine
             .claim_protocol_fees(DEFAULT_QUOTE_TOKEN)
             .unwrap();
 
@@ -137,19 +128,19 @@ impl JoeUniverse {
     }
 
     pub fn deposit(&mut self, amount: u64) {
-        self.joe_universe
+        self.engine
             .deposit(DEFAULT_BASE_TOKEN, amount.into())
             .unwrap();
     }
 
     pub fn withdraw(&mut self, amount: u64) {
-        self.joe_universe
+        self.engine
             .withdraw(DEFAULT_BASE_TOKEN, amount.into())
             .unwrap();
     }
 
     pub fn claim_staking_rewards(&mut self) -> u64 {
-        self.joe_universe
+        self.engine
             .claim_staking_rewards(DEFAULT_BASE_TOKEN)
             .unwrap()
     }
